@@ -99,7 +99,6 @@ class ConversationResponse(BaseModel):
 
     class Config:
         from_attributes = True
-        orm_mode = True
 
 # Evaluation Schemas
 class EvalResultResponse(BaseModel):
