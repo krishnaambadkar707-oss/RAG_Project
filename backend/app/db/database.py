@@ -14,7 +14,13 @@ if IS_VERCEL or os.name != "nt":
             os.path.join(BASE_DIR, "rag_assistant.db"),
             os.path.join(BASE_DIR, "backend", "rag_assistant.db"),
             os.path.join(BASE_DIR, "api", "rag_assistant.db"),
-            os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "rag_assistant.db")
+            os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "rag_assistant.db"),
+            "/var/task/rag_assistant.db",
+            "/var/task/api/rag_assistant.db",
+            "/var/task/backend/rag_assistant.db",
+            os.path.join(os.getcwd(), "rag_assistant.db"),
+            os.path.join(os.getcwd(), "api", "rag_assistant.db"),
+            os.path.join(os.getcwd(), "backend", "rag_assistant.db")
         ]
         for seed_path in candidate_seeds:
             if os.path.exists(seed_path) and os.path.getsize(seed_path) > 0:

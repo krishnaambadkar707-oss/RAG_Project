@@ -3,7 +3,10 @@
   "builds": [
     {
       "src": "api/index.py",
-      "use": "@vercel/python"
+      "use": "@vercel/python",
+      "config": {
+        "includeFiles": ["rag_assistant.db", "backend/**", "api/**"]
+      }
     },
     {
       "src": "package.json",
