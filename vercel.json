@@ -5,7 +5,7 @@
       "src": "api/index.py",
       "use": "@vercel/python",
       "config": {
-        "includeFiles": ["rag_assistant.db", "backend/**", "api/**"]
+        "includeFiles": ["rag_assistant.db", "backend/**"]
       }
     },
     {
@@ -19,11 +19,11 @@
   "routes": [
     {
       "src": "/api",
-      "dest": "/api/index.py"
+      "dest": "api/index.py"
     },
     {
       "src": "/api/(.*)",
-      "dest": "/api/index.py"
+      "dest": "api/index.py"
     },
     {
       "handle": "filesystem"
