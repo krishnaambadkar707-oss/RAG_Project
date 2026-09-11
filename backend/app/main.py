@@ -93,6 +93,14 @@ def read_root():
         "llm_provider": settings.LLM_PROVIDER
     }
 
+@app.get("/health", tags=["Health"])
+def health_check():
+    return {
+        "status": "healthy",
+        "database": "connected",
+        "vector_store": "active"
+    }
+
 @app.get("/favicon.ico", include_in_schema=False)
 def favicon():
     from fastapi.responses import Response

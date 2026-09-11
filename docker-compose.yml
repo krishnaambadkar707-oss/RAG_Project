@@ -5,22 +5,43 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+    container_name: rag_backend
+    restart: always
     ports:
       - "8000:8000"
     environment:
-      - DATABASE_URL=sqlite:///./rag_assistant.db
+      - ENV=production
+      - PORT=8000
+      - HOST=0.0.0.0
+      - DATABASE_URL=sqlite:////app/rag_assistant.db
       - CHROMA_DB_DIR=/app/chroma_data
       - UPLOAD_DIR=/app/uploads
       - JWT_SECRET=supersecret_jwt_key_change_me_in_production_12345
+      - EMBEDDING_PROVIDER=sentence-transformers
+      - LLM_PROVIDER=mock
     volumes:
-      - ./data_storage:/app/chroma_data
-      - ./uploads_storage:/app/uploads
+      - ./rag_assistant.db:/app/rag_assistant.db
+      - ./chroma_data:/app/chroma_data
+      - ./uploads:/app/uploads
+    healthcheck:
+      test: ["CMD", "python", "-c", "import httpx; res = httpx.get('http://localhost:8000/health'); exit(0 if res.status_code == 200 else 1)"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
 
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+    container_name: rag_frontend
+    restart: always
     ports:
       - "3000:80"
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
+
+networks:
+  default:
+    name: rag_network
