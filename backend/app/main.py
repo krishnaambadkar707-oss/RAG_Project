@@ -33,13 +33,26 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Register API Routers
+# Register API Routers (Direct and /api prefixed for Vercel serverless routing)
+from fastapi import APIRouter
+
+api_router = APIRouter(prefix="/api")
+api_router.include_router(auth.router)
+api_router.include_router(collections.router)
+api_router.include_router(documents.router)
+api_router.include_router(query.router)
+api_router.include_router(conversations.router)
+api_router.include_router(evaluation.router)
+
+app.include_router(api_router)
+
 app.include_router(auth.router)
 app.include_router(collections.router)
 app.include_router(documents.router)
 app.include_router(query.router)
 app.include_router(conversations.router)
 app.include_router(evaluation.router)
+
 
 @app.on_event("startup")
 def startup_event():
