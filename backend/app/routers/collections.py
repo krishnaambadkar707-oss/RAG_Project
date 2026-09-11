@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from app.db.database import get_db
 from app.db.models import Collection, Document
-from app.db.schemas import CollectionCreate, CollectionResponse
+from app.db.schemas import CollectionCreate, CollectionResponse, model_validate_compat
 from app.services.auth_service import get_current_user, require_admin
 
 router = APIRouter(prefix="/collections", tags=["Collections"])
@@ -15,7 +15,7 @@ def list_collections(db: Session = Depends(get_db), current_user = Depends(get_c
     res = []
     for c in collections:
         doc_count = db.query(Document).filter(Document.collection_id == c.id).count()
-        item = CollectionResponse.from_orm(c)
+        item = model_validate_compat(CollectionResponse, c)
         item.document_count = doc_count
         res.append(item)
     return res
@@ -35,7 +35,7 @@ def create_collection(
     db.commit()
     db.refresh(collection)
     
-    res = CollectionResponse.from_orm(collection)
+    res = model_validate_compat(CollectionResponse, collection)
     res.document_count = 0
     return res
 

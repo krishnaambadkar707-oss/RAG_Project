@@ -2,6 +2,13 @@ import datetime
 from typing import List, Optional, Any, Dict
 from pydantic import BaseModel, EmailStr
 
+def model_validate_compat(schema_cls, obj):
+    if hasattr(schema_cls, "model_validate"):
+        return schema_cls.model_validate(obj)
+    if hasattr(schema_cls, "from_orm"):
+        return schema_cls.from_orm(obj)
+    return schema_cls(**obj)
+
 # Auth Schemas
 class UserCreate(BaseModel):
     email: EmailStr

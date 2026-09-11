@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.db.database import get_db
-from app.db.schemas import UserCreate, UserResponse, Token, LoginRequest
+from app.db.schemas import UserCreate, UserResponse, Token, LoginRequest, model_validate_compat
 from app.services.auth_service import (
     create_user, get_user_by_email, verify_password, create_access_token, get_current_user
 )
@@ -29,7 +29,7 @@ def login(login_data: LoginRequest, db: Session = Depends(get_db)):
     return Token(
         access_token=access_token,
         token_type="bearer",
-        user=UserResponse.from_orm(user)
+        user=model_validate_compat(UserResponse, user)
     )
 
 @router.get("/me", response_model=UserResponse)
