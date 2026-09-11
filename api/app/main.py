@@ -16,7 +16,10 @@ from app.db.models import User, Collection
 from app.services.auth_service import get_password_hash
 from app.routers import auth, collections, documents, query, conversations, evaluation
 
-Base.metadata.create_all(bind=engine)
+try:
+    Base.metadata.create_all(bind=engine)
+except Exception as _e:
+    print(f"[DB Warning] Module load table creation: {_e}")
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
