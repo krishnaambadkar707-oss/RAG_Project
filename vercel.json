@@ -5,7 +5,7 @@
       "src": "api/index.py",
       "use": "@vercel/python",
       "config": {
-        "includeFiles": ["rag_assistant.db", "backend/**", "api/**"]
+        "includeFiles": ["rag_assistant.db", "backend/**"]
       }
     },
     {
