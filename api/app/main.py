@@ -91,13 +91,81 @@ def startup_event():
             db.add(emp)
 
         # Seed default Collections
-        default_colls = ["HR & Policy", "Engineering & Architecture", "IT & Operations"]
-        for c_name in default_colls:
-            existing = db.query(Collection).filter(Collection.name == c_name).first()
-            if not existing:
-                db.add(Collection(name=c_name, description=f"Internal enterprise documents for {c_name}"))
-        
+        hr_coll = db.query(Collection).filter(Collection.name == "HR & Policy").first()
+        if not hr_coll:
+            hr_coll = Collection(name="HR & Policy", description="Internal enterprise HR policies and leave guides")
+            db.add(hr_coll)
+
+        it_coll = db.query(Collection).filter(Collection.name == "IT & Operations").first()
+        if not it_coll:
+            it_coll = Collection(name="IT & Operations", description="IT setup, VPN access, and security guides")
+            db.add(it_coll)
+
+        eng_coll = db.query(Collection).filter(Collection.name == "Engineering & Architecture").first()
+        if not eng_coll:
+            eng_coll = Collection(name="Engineering & Architecture", description="Core platform architecture specifications")
+            db.add(eng_coll)
+
         db.commit()
+        db.refresh(hr_coll)
+        db.refresh(it_coll)
+        db.refresh(eng_coll)
+
+        # Auto-ingest document files from data/sample_documents/ and uploads/
+        from app.config import BASE_DIR
+        seed_dirs = [
+            (os.path.join(BASE_DIR, "data", "sample_documents"), hr_coll.id),
+            (os.path.join(BASE_DIR, "uploads"), hr_coll.id),
+        ]
+
+        from app.db.models import Document
+        from app.services.document_parser import parse_document
+        from app.services.chunking_service import chunk_document
+        from app.services.vector_store import vector_store
+
+        for s_dir, default_coll_id in seed_dirs:
+            if not os.path.exists(s_dir):
+                continue
+            for fname in os.listdir(s_dir):
+                fpath = os.path.join(s_dir, fname)
+                if not os.path.isfile(fpath):
+                    continue
+                ext = os.path.splitext(fname)[1].lower()
+                if ext not in [".pdf", ".docx", ".doc", ".txt", ".md"]:
+                    continue
+
+                coll_id = default_coll_id
+                if "IT" in fname:
+                    coll_id = it_coll.id
+                elif "Eng" in fname or "PRD" in fname:
+                    coll_id = eng_coll.id
+
+                existing_doc = db.query(Document).filter(Document.filename == fname).first()
+                if not existing_doc:
+                    new_doc = Document(
+                        filename=fname,
+                        collection_id=coll_id,
+                        file_path=fpath,
+                        status="pending"
+                    )
+                    db.add(new_doc)
+                    db.commit()
+                    db.refresh(new_doc)
+                    existing_doc = new_doc
+
+                if existing_doc.status != "processed":
+                    try:
+                        parse_res = parse_document(fpath)
+                        if parse_res and parse_res.pages:
+                            chunks = chunk_document(parse_res, document_id=existing_doc.id, filename=fname, collection_id=coll_id)
+                            vector_store.add_chunks(chunks)
+                            existing_doc.status = "processed"
+                            existing_doc.page_count = parse_res.total_pages
+                            existing_doc.chunk_count = len(chunks)
+                            db.commit()
+                    except Exception as parse_err:
+                        print(f"[Seed Document Warning] {fname}: {parse_err}")
+
     except Exception as e:
         print(f"[Startup Warning] Seeding failed: {e}")
     finally:
