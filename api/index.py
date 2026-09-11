@@ -10,15 +10,6 @@ for d in [api_dir, root_dir, backend_dir]:
     if d not in sys.path:
         sys.path.insert(0, d)
 
-try:
-    from app.main import app
-except ImportError:
-    from backend.app.main import app
-
-try:
-    from mangum import Mangum
-    handler = Mangum(app, api_gateway_base_path="/api")
-except Exception:
-    handler = app
+from app.main import app
 
 app = app
