@@ -46,10 +46,14 @@ def startup_event():
     db = SessionLocal()
     try:
         # Pre-load embedding model so first query request responds instantly
-        from app.services.embedding_service import get_embedding_model
-        print("[Startup] Warming up embedding model...")
-        get_embedding_model()
-        print("[Startup] Embedding model loaded successfully.")
+        try:
+            from app.services.embedding_service import get_embedding_model
+            print("[Startup] Warming up embedding model...")
+            get_embedding_model()
+            print("[Startup] Embedding model initialized successfully.")
+        except Exception as emb_err:
+            print(f"[Startup Warning] Embedding model warmup warning: {emb_err}")
+
 
         # Seed default Admin User if database is empty
         admin_user = db.query(User).filter(User.email == "admin@company.com").first()
