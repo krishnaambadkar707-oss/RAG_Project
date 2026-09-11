@@ -1,0 +1,7 @@
+# Document Hub Test Specification
+
+Section 1: Feature Overview
+The Document Hub feature enables seamless uploading of corporate documentation into vector databases.
+
+Section 2: Security
+All documents are encrypted and scoped to tenant collections.

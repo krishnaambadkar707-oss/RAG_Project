@@ -1,0 +1,41 @@
+Pure Python project : SMART FILE ORGANIZER + SEARCH ENGINE
+Developed a Pure Python-based Smart File Organizer and Search Engine that automatically categorizes files by type, name, and date while enabling fast keyword-based file searching. Implemented file handling, sorting, searching algorithms, and object-oriented programming concepts to improve file management efficiency
+
+
+NumPy project : AUDIO SIGNAL PROCESSOR
+Built an Audio Signal Processing system using NumPy and Python’s Wave module for waveform analysis, signal smoothing, and basic noise reduction. Performed mathematical operations on audio signals and visualized waveform transformations for audio analysis.
+
+
+Pandas project : SOCIAL MEDIA BEHAVIOR ANALYZER
+Created a Social Media Behavior Analyzer using Pandas to analyze user engagement patterns, peak activity hours, and content preferences. Implemented data cleaning, aggregation, and time-series analysis techniques to generate behavioral insights and a digital addiction score.
+
+
+SciPy project : PURE SCIPY ECG SIGNAL ANALYZER
+Developed a Pure SciPy-based ECG Signal Analyzer for processing and analyzing electrocardiogram signals. Implemented signal filtering, peak detection, waveform analysis, and heart-rate monitoring techniques using scientific computing methods to improve biomedical signal interpretation.
+
+
+Matplotlib and seaborn project : INTELLIGENT VISUALIZATION GENERATOR
+Created an Intelligent Visualization Generator using Matplotlib and Seaborn that automatically analyzes user-provided datasets and generates the most suitable graphical visualizations. Implemented automated chart selection logic, statistical plotting, and customizable visualization features for effective exploratory data analysis.
+
+
+Matplotlib, seaborn and pandas project : SMART DATA VISUALIZATION RECOMMENDER
+Designed a Smart Data Visualization Recommender using Pandas, Matplotlib, and Seaborn to analyze dataset structures and recommend optimal visualizations based on data characteristics. Implemented data preprocessing, automated visualization logic, and analytical reporting features to enhance decision-making and data interpretation.
+
+
+Major project of Python with all library : ECG ANALYZER
+Built an ECG Signal Analysis system using SciPy for filtering, signal processing, and heart-rate pattern analysis. Applied numerical computing and visualization techniques to process biomedical signal data efficiently.
+
+
+Major project of Python with libraries numpy, pandas, matplotlib : PERSONAL FINANCE ANALYZER WITH PREDICTION
+Designed a Personal Finance Analyzer that tracks and analyzes expenses through category-wise insights, trend analysis, and future expense prediction. Utilized Pandas, NumPy, and Matplotlib for data processing, numerical analysis, and visualization.
+
+
+R language project : MOVIE RECOMMENDATION ANALYTICS SYSTEM
+Created a Movie Recommendation Analytics system in R to analyze movie datasets and generate recommendation insights using statistical analysis and data visualization techniques. Performed user preference analysis and trend exploration using R programming.
+
+
+
+
+
+
+KGAT_6c9636a196dea62f49cbd6851455a3ef :- Kaggle api
