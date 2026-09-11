@@ -1,0 +1,15 @@
+# Core Platform Architecture Specification
+
+Section 1: Microservices Architecture
+1.1 The enterprise backend service layer is deployed on Kubernetes (EKS) using containerized FastAPI Python services.
+1.2 Asynchronous job queues and message passing are handled by RabbitMQ with Redis as an in-memory session cache.
+1.3 Primary relational persistence is hosted on AWS Aurora PostgreSQL with multi-AZ read replicas.
+
+Section 2: RAG Vector Database Pipeline
+2.1 Text embeddings are processed using OpenAI text-embedding-3-small or SentenceTransformers models.
+2.2 Vector search indices are managed in ChromaDB with cosine distance metric for fast top-k similarity calculation.
+2.3 Text chunking strategy uses a sliding window of 600 characters with 100 character overlap to retain context across boundaries.
+
+Section 3: System Availability & SLA
+3.1 Target service availability for core API endpoints is 99.9% uptime per calendar quarter.
+3.2 Automated database backups occur daily at 02:00 UTC with a Point-In-Time Recovery (PITR) retention window of 30 days.

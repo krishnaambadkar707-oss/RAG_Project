@@ -1,0 +1,72 @@
+[
+  {
+    "id": 1,
+    "question": "How many days of paid annual leave do full-time employees get?",
+    "expected_answer": "Full-time employees receive 20 business days of paid annual leave per calendar year.",
+    "expected_doc": "HR_Policy.txt",
+    "category": "HR"
+  },
+  {
+    "id": 2,
+    "question": "What is the home office equipment setup stipend?",
+    "expected_answer": "The company provides a $500 one-time stipend for home office equipment setup upon joining.",
+    "expected_doc": "HR_Policy.txt",
+    "category": "HR"
+  },
+  {
+    "id": 3,
+    "question": "How long is paid primary caregiver leave?",
+    "expected_answer": "Primary caregivers are eligible for 16 weeks of fully paid parental leave.",
+    "expected_doc": "HR_Policy.txt",
+    "category": "HR"
+  },
+  {
+    "id": 4,
+    "question": "How often do VPN certificates expire and how do I renew them?",
+    "expected_answer": "VPN certificates expire every 90 days. To request or renew, go to IT Self-Service Portal (https://it.company.internal/vpn) and select 'Generate Certificate'.",
+    "expected_doc": "IT_Setup_Guide.txt",
+    "category": "IT"
+  },
+  {
+    "id": 5,
+    "question": "What disk encryption is required for Mac and Windows laptops?",
+    "expected_answer": "BitLocker for Windows and FileVault for macOS must be enabled at all times.",
+    "expected_doc": "IT_Setup_Guide.txt",
+    "category": "IT"
+  },
+  {
+    "id": 6,
+    "question": "What MFA app is required for VPN connection?",
+    "expected_answer": "Multi-factor authentication (MFA) using the RSA SecureID mobile application is mandatory.",
+    "expected_doc": "IT_Setup_Guide.txt",
+    "category": "IT"
+  },
+  {
+    "id": 7,
+    "question": "What is the chunking strategy used in the RAG pipeline?",
+    "expected_answer": "Text chunking strategy uses a sliding window of 600 characters with 100 character overlap.",
+    "expected_doc": "Engineering_Architecture.txt",
+    "category": "Engineering"
+  },
+  {
+    "id": 8,
+    "question": "What is the primary database technology for relational persistence?",
+    "expected_answer": "Primary relational persistence is hosted on AWS Aurora PostgreSQL with multi-AZ read replicas.",
+    "expected_doc": "Engineering_Architecture.txt",
+    "category": "Engineering"
+  },
+  {
+    "id": 9,
+    "question": "What is the target uptime SLA for core API endpoints?",
+    "expected_answer": "Target service availability for core API endpoints is 99.9% uptime per calendar quarter.",
+    "expected_doc": "Engineering_Architecture.txt",
+    "category": "Engineering"
+  },
+  {
+    "id": 10,
+    "question": "What is the recipe for baking sourdough bread?",
+    "expected_answer": "I don't have enough context in the provided documents to answer this question.",
+    "expected_doc": "None",
+    "category": "Out-of-Scope"
+  }
+]

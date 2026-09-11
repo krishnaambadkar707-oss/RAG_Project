@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=sqlite:///./rag_assistant.db
+      - CHROMA_DB_DIR=/app/chroma_data
+      - UPLOAD_DIR=/app/uploads
+      - JWT_SECRET=supersecret_jwt_key_change_me_in_production_12345
+    volumes:
+      - ./data_storage:/app/chroma_data
+      - ./uploads_storage:/app/uploads
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend

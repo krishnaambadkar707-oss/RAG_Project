@@ -1,0 +1,16 @@
+# Enterprise IT Setup & Security Guide
+
+Section 1: VPN Access & Certificates
+1.1 Access to internal production servers and staging environments requires connecting via GlobalProtect VPN.
+1.2 VPN certificates expire every 90 days. To request a new certificate or renew an existing one, navigate to the IT Self-Service Portal (https://it.company.internal/vpn) and select 'Generate Certificate'.
+1.3 Multi-factor authentication (MFA) using the RSA SecureID mobile application is mandatory for all VPN connection attempts.
+
+Section 2: Device Encryption & Antivirus Requirements
+2.1 All corporate laptops must have BitLocker (Windows) or FileVault (macOS) disk encryption enabled at all times.
+2.2 CrowdStrike Falcon sensor must remain active on all devices. Disabling security agents will auto-revoke network access.
+2.3 Software updates and security patches must be installed within 7 days of release notice.
+
+Section 3: Password Management & Single Sign-On
+3.1 Passwords must be a minimum of 16 characters including uppercase, lowercase, numbers, and special symbols.
+3.2 All corporate accounts are unified under Okta Single Sign-On (SSO).
+3.3 1Password enterprise vault licenses are provided to all engineering and operational staff.
