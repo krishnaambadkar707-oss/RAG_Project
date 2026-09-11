@@ -4,12 +4,19 @@ import sys
 # Add root directory and backend directory to sys.path so imports resolve seamlessly
 root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 backend_dir = os.path.join(root_dir, "backend")
+app_dir = os.path.join(backend_dir, "app")
 
-if root_dir not in sys.path:
-    sys.path.insert(0, root_dir)
-if backend_dir not in sys.path:
-    sys.path.insert(0, backend_dir)
+for d in [root_dir, backend_dir, app_dir]:
+    if d not in sys.path and os.path.exists(d):
+        sys.path.insert(0, d)
 
-from backend.app.main import app
+try:
+    from backend.app.main import app
+except ImportError:
+    try:
+        from app.main import app
+    except ImportError:
+        from main import app
+
 
 
