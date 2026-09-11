@@ -36,13 +36,16 @@ if IS_VERCEL or os.name != "nt":
                     print(f"[Database Hydration Warning] Failed copying seed DB: {copy_err}")
     db_url = f"sqlite:///{target_tmp_db}"
 
+from sqlalchemy.pool import NullPool
+
 connect_args = {}
 if db_url.startswith("sqlite"):
-    connect_args = {"check_same_thread": False}
+    connect_args = {"check_same_thread": False, "timeout": 30}
 
 engine = create_engine(
     db_url,
     connect_args=connect_args,
+    poolclass=NullPool,
     echo=False
 )
 
