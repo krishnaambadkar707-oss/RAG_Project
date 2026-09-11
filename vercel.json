@@ -1,4 +1,9 @@
 {
+  "functions": {
+    "api/index.py": {
+      "includeFiles": "rag_assistant.db"
+    }
+  },
   "rewrites": [
     {
       "source": "/api/(.*)",

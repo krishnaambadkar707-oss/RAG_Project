@@ -74,6 +74,11 @@ def init_db():
         except Exception as e:
             print(f"[DB Warning] Auto create_all warning: {e}")
 
+try:
+    init_db()
+except Exception as _e:
+    print(f"[DB Warning] Module load init_db: {_e}")
+
 def get_db():
     init_db()
     db = SessionLocal()
@@ -81,3 +86,4 @@ def get_db():
         yield db
     finally:
         db.close()
+
