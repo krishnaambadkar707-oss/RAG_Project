@@ -1,7 +1,5 @@
 import os
 from typing import List, Dict, Any
-from pypdf import PdfReader
-from docx import Document as DocxReader
 
 class ParsedPage:
     def __init__(self, page_number: int, text: str, section_title: str = ""):
@@ -16,6 +14,7 @@ class DocumentParseResult:
 
 def parse_pdf(file_path: str) -> DocumentParseResult:
     try:
+        from pypdf import PdfReader
         reader = PdfReader(file_path, strict=False)
         pages = []
         total_pages = len(reader.pages)
@@ -58,6 +57,7 @@ def parse_pdf(file_path: str) -> DocumentParseResult:
 
 def parse_docx(file_path: str) -> DocumentParseResult:
     try:
+        from docx import Document as DocxReader
         doc = DocxReader(file_path)
         pages = []
         current_section = "General"
