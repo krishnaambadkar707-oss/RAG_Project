@@ -91,7 +91,12 @@ def run_evaluation_suite(db: Session, name: str = "Benchmark Evaluation Run", co
         total_relevance += relevance_score
         total_latency += latency_ms
 
-        sources_json = [c.dict() for c in sources]
+        def _to_dict(obj):
+            if hasattr(obj, "model_dump"):
+                return obj.model_dump()
+            return obj.dict()
+
+        sources_json = [_to_dict(c) for c in sources]
         eval_result = EvalResult(
             eval_run_id=eval_run.id,
             question=q,

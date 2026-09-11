@@ -60,8 +60,12 @@ def query_knowledge_base(
         citations=citations
     )
 
-    # 4. Store Assistant Response Message
-    sources_data = [s.dict() for s in sources]
+    def _to_dict(obj):
+        if hasattr(obj, "model_dump"):
+            return obj.model_dump()
+        return obj.dict()
+
+    sources_data = [_to_dict(s) for s in sources]
     assistant_msg = Message(
         conversation_id=conversation.id,
         role="assistant",
