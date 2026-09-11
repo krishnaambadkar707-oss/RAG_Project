@@ -102,6 +102,11 @@ app.include_router(evaluation.router)
 
 @app.on_event("startup")
 def startup_event():
+    from app.config import IS_VERCEL
+    if IS_VERCEL:
+        print("[Startup] Skipping startup seeding on Vercel serverless runtime.")
+        return
+
     db = SessionLocal()
     try:
         # Pre-load embedding model so first query request responds instantly
