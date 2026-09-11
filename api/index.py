@@ -12,24 +12,20 @@ if root_dir not in sys.path:
     sys.path.append(root_dir)
 
 try:
+    from mangum import Mangum
     from app.main import app
-    app = app
+    
+    handler = Mangum(app, lifespan="off")
+    app = handler
 except Exception as e:
     tb_str = traceback.format_exc()
-    print(f"[Vercel Index Error] Failed to import app.main: {e}\n{tb_str}")
-    from fastapi import FastAPI
-    from fastapi.responses import JSONResponse
-    app = FastAPI()
-    
-    @app.api_route("/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"])
-    def error_fallback(path: str = ""):
-        return JSONResponse(
-            status_code=500,
-            content={
-                "error": "Vercel Python Import Exception",
-                "exception": str(e),
-                "type": type(e).__name__,
-                "traceback": tb_str
-            }
-        )
+    print(f"[Vercel Index Error] Failed to initialize Mangum/FastAPI app: {e}\n{tb_str}")
+    def handler(event, context):
+        return {
+            "statusCode": 500,
+            "headers": {"Content-Type": "application/json"},
+            "body": f'{{"error": "Handler Init Failed", "details": "{str(e)}"}}'
+        }
+    app = handler
+
 
