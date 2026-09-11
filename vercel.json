@@ -1,22 +1,8 @@
 {
-  "outputDirectory": "frontend/dist",
-  "functions": {
-    "api/index.py": {
-      "includeFiles": "rag_assistant.db,backend/**"
-    }
-  },
   "rewrites": [
-    {
-      "source": "/api",
-      "destination": "/api/index.py"
-    },
     {
       "source": "/api/(.*)",
       "destination": "/api/index.py"
-    },
-    {
-      "source": "/((?!api/).*)",
-      "destination": "/index.html"
     }
   ]
 }
