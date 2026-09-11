@@ -46,6 +46,17 @@ engine = create_engine(
     echo=False
 )
 
+from sqlalchemy import event
+@event.listens_for(engine, "connect")
+def set_sqlite_pragma(dbapi_connection, connection_record):
+    try:
+        cursor = dbapi_connection.cursor()
+        cursor.execute("PRAGMA journal_mode=DELETE")
+        cursor.execute("PRAGMA synchronous=OFF")
+        cursor.close()
+    except Exception as pragma_err:
+        print(f"[DB Warning] SQLite PRAGMA configuration warning: {pragma_err}")
+
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 

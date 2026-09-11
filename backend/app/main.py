@@ -53,8 +53,8 @@ def health_check_api():
 def debug_endpoint():
     info = {
         "is_vercel": IS_VERCEL,
-        "tmp_db_exists": os.path.exists("/tmp/rag_assistant.db"),
-        "tmp_db_size": os.path.getsize("/tmp/rag_assistant.db") if os.path.exists("/tmp/rag_assistant.db") else 0,
+        "tmp_exists": os.path.exists("/tmp/rag_assistant.db"),
+        "tmp_size": os.path.getsize("/tmp/rag_assistant.db") if os.path.exists("/tmp/rag_assistant.db") else 0,
         "tables": [],
         "error": None
     }
@@ -63,7 +63,8 @@ def debug_endpoint():
         inspector = inspect(engine)
         info["tables"] = inspector.get_table_names()
     except Exception as e:
-        info["error"] = str(e)
+        import traceback
+        info["error"] = f"{type(e).__name__}: {str(e)}\n{traceback.format_exc()}"
     return info
 
 api_router.include_router(auth.router)
