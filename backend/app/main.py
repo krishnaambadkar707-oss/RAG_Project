@@ -40,6 +40,15 @@ app.add_middleware(
 from fastapi import APIRouter
 
 api_router = APIRouter(prefix="/api")
+
+@api_router.get("/health", tags=["Health"])
+def health_check_api():
+    return {
+        "status": "healthy",
+        "database": "connected",
+        "vector_store": "active"
+    }
+
 api_router.include_router(auth.router)
 api_router.include_router(collections.router)
 api_router.include_router(documents.router)
@@ -111,60 +120,61 @@ def startup_event():
         db.refresh(it_coll)
         db.refresh(eng_coll)
 
-        # Auto-ingest document files from data/sample_documents/ and uploads/
-        from app.config import BASE_DIR
-        seed_dirs = [
-            (os.path.join(BASE_DIR, "data", "sample_documents"), hr_coll.id),
-            (os.path.join(BASE_DIR, "uploads"), hr_coll.id),
-        ]
+        # Skip slow file re-parsing on serverless cold starts (database already contains pre-parsed records)
+        from app.config import IS_VERCEL, BASE_DIR
+        if not IS_VERCEL:
+            seed_dirs = [
+                (os.path.join(BASE_DIR, "data", "sample_documents"), hr_coll.id),
+                (os.path.join(BASE_DIR, "uploads"), hr_coll.id),
+            ]
 
-        from app.db.models import Document
-        from app.services.document_parser import parse_document
-        from app.services.chunking_service import chunk_document
-        from app.services.vector_store import vector_store
+            from app.db.models import Document
+            from app.services.document_parser import parse_document
+            from app.services.chunking_service import chunk_document
+            from app.services.vector_store import vector_store
 
-        for s_dir, default_coll_id in seed_dirs:
-            if not os.path.exists(s_dir):
-                continue
-            for fname in os.listdir(s_dir):
-                fpath = os.path.join(s_dir, fname)
-                if not os.path.isfile(fpath):
+            for s_dir, default_coll_id in seed_dirs:
+                if not os.path.exists(s_dir):
                     continue
-                ext = os.path.splitext(fname)[1].lower()
-                if ext not in [".pdf", ".docx", ".doc", ".txt", ".md"]:
-                    continue
+                for fname in os.listdir(s_dir):
+                    fpath = os.path.join(s_dir, fname)
+                    if not os.path.isfile(fpath):
+                        continue
+                    ext = os.path.splitext(fname)[1].lower()
+                    if ext not in [".pdf", ".docx", ".doc", ".txt", ".md"]:
+                        continue
 
-                coll_id = default_coll_id
-                if "IT" in fname:
-                    coll_id = it_coll.id
-                elif "Eng" in fname or "PRD" in fname:
-                    coll_id = eng_coll.id
+                    coll_id = default_coll_id
+                    if "IT" in fname:
+                        coll_id = it_coll.id
+                    elif "Eng" in fname or "PRD" in fname:
+                        coll_id = eng_coll.id
 
-                existing_doc = db.query(Document).filter(Document.filename == fname).first()
-                if not existing_doc:
-                    new_doc = Document(
-                        filename=fname,
-                        collection_id=coll_id,
-                        file_path=fpath,
-                        status="pending"
-                    )
-                    db.add(new_doc)
-                    db.commit()
-                    db.refresh(new_doc)
-                    existing_doc = new_doc
+                    existing_doc = db.query(Document).filter(Document.filename == fname).first()
+                    if not existing_doc:
+                        new_doc = Document(
+                            filename=fname,
+                            collection_id=coll_id,
+                            file_path=fpath,
+                            status="pending"
+                        )
+                        db.add(new_doc)
+                        db.commit()
+                        db.refresh(new_doc)
+                        existing_doc = new_doc
 
-                if existing_doc.status != "processed":
-                    try:
-                        parse_res = parse_document(fpath)
-                        if parse_res and parse_res.pages:
-                            chunks = chunk_document(parse_res, document_id=existing_doc.id, filename=fname, collection_id=coll_id)
-                            vector_store.add_chunks(chunks)
-                            existing_doc.status = "processed"
-                            existing_doc.page_count = parse_res.total_pages
-                            existing_doc.chunk_count = len(chunks)
-                            db.commit()
-                    except Exception as parse_err:
-                        print(f"[Seed Document Warning] {fname}: {parse_err}")
+                    if existing_doc.status != "processed":
+                        try:
+                            parse_res = parse_document(fpath)
+                            if parse_res and parse_res.pages:
+                                chunks = chunk_document(parse_res, document_id=existing_doc.id, filename=fname, collection_id=coll_id)
+                                vector_store.add_chunks(chunks)
+                                existing_doc.status = "processed"
+                                existing_doc.page_count = parse_res.total_pages
+                                existing_doc.chunk_count = len(chunks)
+                                db.commit()
+                        except Exception as parse_err:
+                            print(f"[Seed Document Warning] {fname}: {parse_err}")
 
     except Exception as e:
         print(f"[Startup Warning] Seeding failed: {e}")
@@ -181,9 +191,8 @@ def read_root():
         "llm_provider": settings.LLM_PROVIDER
     }
 
-@api_router.get("/health", tags=["Health"])
 @app.get("/health", tags=["Health"])
-def health_check():
+def health_check_app():
     return {
         "status": "healthy",
         "database": "connected",
@@ -194,3 +203,4 @@ def health_check():
 def favicon():
     from fastapi.responses import Response
     return Response(status_code=204)
+

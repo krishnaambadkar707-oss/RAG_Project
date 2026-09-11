@@ -14,3 +14,6 @@ try:
     from app.main import app
 except ImportError:
     from backend.app.main import app
+
+handler = app
+
