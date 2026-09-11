@@ -1,14 +1,6 @@
 from typing import List, Optional, Dict, Any
 import math
 
-# SQLite version compatibility shim for Linux / Vercel Serverless
-try:
-    __import__('pysqlite3')
-    import sys
-    sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
-except ImportError:
-    pass
-
 from app.config import settings
 from app.services.chunking_service import Chunk
 from app.services.embedding_service import embed_texts, embed_single_text
