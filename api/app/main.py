@@ -49,6 +49,23 @@ def health_check_api():
         "vector_store": "active"
     }
 
+@api_router.get("/debug", tags=["Health"])
+def debug_endpoint():
+    info = {
+        "is_vercel": IS_VERCEL,
+        "tmp_db_exists": os.path.exists("/tmp/rag_assistant.db"),
+        "tmp_db_size": os.path.getsize("/tmp/rag_assistant.db") if os.path.exists("/tmp/rag_assistant.db") else 0,
+        "tables": [],
+        "error": None
+    }
+    try:
+        from sqlalchemy import inspect
+        inspector = inspect(engine)
+        info["tables"] = inspector.get_table_names()
+    except Exception as e:
+        info["error"] = str(e)
+    return info
+
 api_router.include_router(auth.router)
 api_router.include_router(collections.router)
 api_router.include_router(documents.router)

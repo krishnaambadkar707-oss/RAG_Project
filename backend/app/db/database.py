@@ -25,7 +25,11 @@ if IS_VERCEL or os.name != "nt":
         for seed_path in candidate_seeds:
             if os.path.exists(seed_path) and os.path.getsize(seed_path) > 0:
                 try:
-                    shutil.copy2(seed_path, target_tmp_db)
+                    shutil.copyfile(seed_path, target_tmp_db)
+                    try:
+                        os.chmod(target_tmp_db, 0o666)
+                    except Exception:
+                        pass
                     print(f"[Database Hydration] Copied pre-populated DB from {seed_path} to {target_tmp_db}")
                     break
                 except Exception as copy_err:
