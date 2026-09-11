@@ -110,6 +110,7 @@ def read_root():
         "llm_provider": settings.LLM_PROVIDER
     }
 
+@api_router.get("/health", tags=["Health"])
 @app.get("/health", tags=["Health"])
 def health_check():
     return {
