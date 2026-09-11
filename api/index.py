@@ -15,5 +15,10 @@ try:
 except ImportError:
     from backend.app.main import app
 
-handler = app
+try:
+    from mangum import Mangum
+    handler = Mangum(app, api_gateway_base_path="/api")
+except Exception:
+    handler = app
 
+app = app
