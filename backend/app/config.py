@@ -61,6 +61,12 @@ class Settings(BaseSettings):
 
 settings = Settings()
 
+# Force safe /tmp paths on Vercel serverless environment (overriding read-only .env defaults)
+if IS_VERCEL:
+    settings.DATABASE_URL = "sqlite:////tmp/rag_assistant.db"
+    settings.CHROMA_DB_DIR = "/tmp/chroma_data"
+    settings.UPLOAD_DIR = "/tmp/uploads"
+
 try:
     os.makedirs(settings.CHROMA_DB_DIR, exist_ok=True)
     os.makedirs(settings.UPLOAD_DIR, exist_ok=True)

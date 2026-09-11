@@ -1,14 +1,18 @@
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-from app.config import settings
+from app.config import settings, IS_VERCEL
+
+db_url = settings.DATABASE_URL
+if IS_VERCEL:
+    db_url = "sqlite:////tmp/rag_assistant.db"
 
 connect_args = {}
-if settings.DATABASE_URL.startswith("sqlite"):
+if db_url.startswith("sqlite"):
     connect_args = {"check_same_thread": False}
 
 engine = create_engine(
-    settings.DATABASE_URL,
+    db_url,
     connect_args=connect_args,
     echo=False
 )
