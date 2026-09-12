@@ -3,14 +3,24 @@ from typing import List, Tuple
 from app.config import settings
 from app.db.schemas import Citation
 
-SYSTEM_GROUNDING_PROMPT = """You are an Enterprise Knowledge Assistant. Your job is to answer employee questions strictly and accurately based ONLY on the provided document context below.
+SYSTEM_GROUNDING_PROMPT = """You are a helpful Enterprise Knowledge Assistant. Your job is to answer employee questions in a simple, easy-to-understand way using ONLY the provided document context.
 
-CRITICAL INSTRUCTIONS:
-1. Ground your answer completely in the provided context.
-2. If the answer cannot be found in or directly inferred from the provided context, clearly state: "I don't have enough context in the provided documents to answer this question."
-3. Do NOT invent policies, dates, passwords, or technical steps not present in the text.
-4. Cite your sources in the text where relevant using the format: [Document Name, Page X, Section Y].
-5. Keep your tone professional, concise, and helpful.
+🎯 KEY INSTRUCTIONS:
+1. Use SIMPLE, EVERYDAY LANGUAGE - avoid jargon and technical terms
+2. Keep answers SHORT and CLEAR - use bullet points for lists
+3. Answer ONLY from the provided documents - do NOT make up information
+4. Format nicely:
+   - Use bullet points (•) for lists
+   - Use clear sections with headers
+   - Make it easy to scan and read
+5. If you can't find the answer in documents, say: "I couldn't find this answer in our documents"
+6. Always mention which document and page you got the info from
+
+✅ EXAMPLE GOOD ANSWER:
+"According to HR Policy (Page 2):
+• Full-time employees get 20 days of annual leave
+• You can carry over 5 unused days to next year
+• Request leave on our intranet"
 
 PROVIDED CONTEXT:
 {context_text}
@@ -28,7 +38,7 @@ def generate_grounded_answer(query: str, citations: List[Citation]) -> Tuple[str
 
     # Fallback check: if no citations or maximum similarity is below threshold
     if not citations or max((c.similarity_score for c in citations), default=0.0) < min_threshold:
-        fallback_msg = "I don't have enough context in the provided documents to answer this question. Please upload relevant documentation or adjust your collection filter."
+        fallback_msg = "I couldn't find an answer to your question in the available documents. Try asking in a different way or upload the relevant documents first."
         latency = round((time.time() - start_time) * 1000, 2)
         return fallback_msg, [], latency
 
@@ -71,35 +81,57 @@ def generate_grounded_answer(query: str, citations: List[Citation]) -> Tuple[str
         except Exception as e:
             print(f"[LLM] Gemini call failed: {e}")
 
-    # Default / Local Capstone Grounded Answer Generator
+    # Default / Local Grounded Answer Generator - Simple & User-Friendly
     if not answer:
         top_citation = citations[0]
+        
+        def clean_snippet(text, max_length=300):
+            """Clean snippet to make it readable and user-friendly"""
+            text = text.strip()
+            # Remove extra whitespace
+            text = ' '.join(text.split())
+            # Keep first sentences only
+            sentences = text.split('.')
+            clean_sentences = [s.strip() for s in sentences if len(s.strip()) > 5]
+            result = '. '.join(clean_sentences[:2])
+            if len(result) > max_length:
+                result = result[:max_length] + "..."
+            return result
+        
         if is_summary_query:
-            answer = f"### Executive Summary of **{top_citation.filename}**\n\n"
+            # Summary format: Clean bullet points
+            answer = f"📋 **Overview of {top_citation.filename}**\n\n"
             summary_points = []
             seen_sections = set()
+            
             for c in citations:
-                if c.section_title not in seen_sections:
+                if c.section_title not in seen_sections and len(summary_points) < 5:
                     seen_sections.add(c.section_title)
-                    summary_points.append(f"• **Section '{c.section_title}'** (Page {c.page_number}): {c.snippet[:240].strip()}...")
-                elif len(summary_points) < 4:
-                    summary_points.append(f"• **Page {c.page_number}**: {c.snippet[:200].strip()}...")
+                    clean_text = clean_snippet(c.snippet, 180)
+                    summary_points.append(f"• **{c.section_title}:** {clean_text}")
             
             if summary_points:
-                answer += "\n\n".join(summary_points)
+                answer += "\n".join(summary_points)
             else:
-                answer += citations[0].snippet[:500]
+                answer += clean_snippet(citations[0].snippet)
                 
-            answer += f"\n\n*(Source: {top_citation.filename}, Total Grounded Sources: {len(citations)})*"
+            answer += f"\n\n📄 Source: **{top_citation.filename}** (Page {top_citation.page_number})"
         else:
-            snippets_text = " ".join([c.snippet for c in citations[:3]])
-            answer = f"Based on **{top_citation.filename}** (Page {top_citation.page_number}, Section *'{top_citation.section_title}'*):\n\n"
-            lines = [l.strip() for l in snippets_text.split(".") if len(l.strip()) > 15]
-            if lines:
-                answer += ". ".join(lines[:3]) + "."
-            else:
-                answer += snippets_text[:400] + "..."
-            answer += f"\n\n*(Source: {top_citation.filename}, Page {top_citation.page_number})*"
+            # Q&A format: Direct, simple answer
+            clean_text = clean_snippet(top_citation.snippet, 350)
+            answer = f"{clean_text}"
+            
+            # Add more context if available from other sources
+            additional_info = []
+            for c in citations[1:3]:
+                if c.section_title != top_citation.section_title:
+                    snippet = clean_snippet(c.snippet, 150)
+                    additional_info.append(f"• Also in **{c.section_title}** (Page {c.page_number}): {snippet}")
+            
+            if additional_info:
+                answer += "\n\n**More Information:**\n" + "\n".join(additional_info)
+            
+            answer += f"\n\n📄 From **{top_citation.filename}** • Page {top_citation.page_number} • Section: *{top_citation.section_title}*"
 
     latency_ms = round((time.time() - start_time) * 1000, 2)
     return answer, citations, latency_ms

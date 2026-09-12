@@ -1,6 +1,100 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Sparkles, FileText, CheckCircle2, Clock, Info, ShieldAlert, ChevronDown, ChevronUp } from 'lucide-react';
 
+// Helper function to render formatted text content
+const renderFormattedText = (text) => {
+  if (!text) return null;
+  
+  // Split by lines and process each line
+  const lines = text.split('\n');
+  const elements = [];
+  
+  let currentList = [];
+  
+  lines.forEach((line, idx) => {
+    const trimmed = line.trim();
+    
+    // Empty line - add spacing
+    if (!trimmed) {
+      if (currentList.length > 0) {
+        elements.push(
+          <ul key={`list-${idx}`} style={{ margin: '8px 0', paddingLeft: '20px' }}>
+            {currentList.map((item, i) => (
+              <li key={i} style={{ marginBottom: '4px', lineHeight: '1.5' }}>{item}</li>
+            ))}
+          </ul>
+        );
+        currentList = [];
+      }
+      elements.push(<div key={`space-${idx}`} style={{ height: '8px' }} />);
+      return;
+    }
+    
+    // Bullet points
+    if (trimmed.startsWith('•')) {
+      currentList.push(trimmed.substring(1).trim());
+    } else if (trimmed.startsWith('-')) {
+      currentList.push(trimmed.substring(1).trim());
+    }
+    // Bold text (enclosed in **)
+    else if (trimmed.includes('**')) {
+      if (currentList.length > 0) {
+        elements.push(
+          <ul key={`list-${idx}`} style={{ margin: '8px 0', paddingLeft: '20px' }}>
+            {currentList.map((item, i) => (
+              <li key={i} style={{ marginBottom: '4px', lineHeight: '1.5' }}>{item}</li>
+            ))}
+          </ul>
+        );
+        currentList = [];
+      }
+      
+      const parts = trimmed.split(/(\*\*.*?\*\*)/g);
+      elements.push(
+        <p key={idx} style={{ margin: '6px 0', fontWeight: trimmed.startsWith('•') ? 400 : 500, fontSize: trimmed.includes('#') ? '1rem' : '0.95rem' }}>
+          {parts.map((part, i) => {
+            if (part.startsWith('**') && part.endsWith('**')) {
+              return <strong key={i}>{part.slice(2, -2)}</strong>;
+            }
+            return part;
+          })}
+        </p>
+      );
+    }
+    // Regular paragraph
+    else {
+      if (currentList.length > 0) {
+        elements.push(
+          <ul key={`list-${idx}`} style={{ margin: '8px 0', paddingLeft: '20px' }}>
+            {currentList.map((item, i) => (
+              <li key={i} style={{ marginBottom: '4px', lineHeight: '1.5' }}>{item}</li>
+            ))}
+          </ul>
+        );
+        currentList = [];
+      }
+      elements.push(
+        <p key={idx} style={{ margin: '6px 0', lineHeight: '1.6', color: '#e5e7eb' }}>
+          {trimmed}
+        </p>
+      );
+    }
+  });
+  
+  // Add remaining list items
+  if (currentList.length > 0) {
+    elements.push(
+      <ul key={`list-final`} style={{ margin: '8px 0', paddingLeft: '20px' }}>
+        {currentList.map((item, i) => (
+          <li key={i} style={{ marginBottom: '4px', lineHeight: '1.5' }}>{item}</li>
+        ))}
+      </ul>
+    );
+  }
+  
+  return elements;
+};
+
 export default function ChatInterface({
   messages,
   onSendMessage,
@@ -27,10 +121,10 @@ export default function ChatInterface({
   };
 
   const suggestedQuestions = [
-    "What is the company leave policy?",
-    "How do I request a VPN certificate?",
-    "What database is used for platform persistence?",
-    "What is the home office stipend amount?"
+    "How much annual leave do I get?",
+    "How do I set up a VPN connection?",
+    "What database do we use?",
+    "What's the home office allowance?"
   ];
 
   return (
@@ -39,14 +133,14 @@ export default function ChatInterface({
       {/* Scope Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', paddingBottom: '12px', borderBottom: '1px solid var(--border-color)' }}>
         <div>
-          <h2 style={{ fontSize: '1.2rem', fontWeight: 600 }}>Enterprise Knowledge Q&A</h2>
+          <h2 style={{ fontSize: '1.2rem', fontWeight: 600 }}>💬 Ask Questions</h2>
           <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-            Answers strictly grounded in internal documents with verifiable citations.
+            Ask anything about your company policies, procedures, or technical docs - get clear, cited answers.
           </p>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <span className="badge badge-indigo">
-            Scope: {selectedCollectionName || 'All Collections'}
+            📚 {selectedCollectionName || 'All Documents'}
           </span>
         </div>
       </div>
@@ -67,9 +161,9 @@ export default function ChatInterface({
             }}>
               <Sparkles size={28} color="#818cf8" />
             </div>
-            <h3 style={{ fontSize: '1.2rem', fontWeight: 600, marginBottom: '8px' }}>Ask internal policy or technical questions</h3>
+            <h3 style={{ fontSize: '1.2rem', fontWeight: 600, marginBottom: '8px' }}>Welcome to Your Knowledge Assistant! 👋</h3>
             <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '20px' }}>
-              The assistant searches your document corpus, extracts grounded context, and returns cited answers.
+              Ask any question about company policies, procedures, or technical information. The assistant will search through your documents and give you clear, easy-to-understand answers with sources.
             </p>
 
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', justifyContent: 'center' }}>
@@ -114,7 +208,9 @@ export default function ChatInterface({
                     boxShadow: isUser ? '0 4px 12px rgba(79, 70, 229, 0.3)' : 'none'
                   }}
                 >
-                  <div style={{ whiteSpace: 'pre-wrap' }}>{msg.content}</div>
+                  <div style={{ whiteSpace: 'pre-wrap' }}>
+                    {isUser ? msg.content : renderFormattedText(msg.content)}
+                  </div>
 
                   {/* Assistant Message Extra Info: Latency & Grounded Badge */}
                   {!isUser && (
@@ -210,7 +306,7 @@ export default function ChatInterface({
       <form onSubmit={handleSubmit} style={{ marginTop: '16px', display: 'flex', gap: '10px' }}>
         <input
           type="text"
-          placeholder="Ask a question about leave policies, VPN certificates, architecture..."
+          placeholder="Ask me anything... 'How much vacation time?', 'How to request time off?', etc."
           value={inputQuery}
           onChange={(e) => setInputQuery(e.target.value)}
           disabled={isLoading}
