@@ -46,7 +46,7 @@ def global_exception_handler(request, exc):
 # Enable CORS for local development and frontend app
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=settings.get_allowed_origins(),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -65,24 +65,6 @@ def health_check_api():
         "vector_store": "active"
     }
 
-@api_router.get("/debug", tags=["Health"])
-def debug_endpoint():
-    info = {
-        "is_vercel": IS_VERCEL,
-        "tmp_exists": os.path.exists("/tmp/rag_assistant.db"),
-        "tmp_size": os.path.getsize("/tmp/rag_assistant.db") if os.path.exists("/tmp/rag_assistant.db") else 0,
-        "tables": [],
-        "error": None
-    }
-    try:
-        from sqlalchemy import inspect
-        inspector = inspect(engine)
-        info["tables"] = inspector.get_table_names()
-    except Exception as e:
-        import traceback
-        info["error"] = f"{type(e).__name__}: {str(e)}\n{traceback.format_exc()}"
-    return info
-
 api_router.include_router(auth.router)
 api_router.include_router(collections.router)
 api_router.include_router(documents.router)
@@ -91,13 +73,6 @@ api_router.include_router(conversations.router)
 api_router.include_router(evaluation.router)
 
 app.include_router(api_router)
-
-app.include_router(auth.router)
-app.include_router(collections.router)
-app.include_router(documents.router)
-app.include_router(query.router)
-app.include_router(conversations.router)
-app.include_router(evaluation.router)
 
 
 @app.on_event("startup")

@@ -16,9 +16,10 @@ services:
       - DATABASE_URL=sqlite:////app/rag_assistant.db
       - CHROMA_DB_DIR=/app/chroma_data
       - UPLOAD_DIR=/app/uploads
-      - JWT_SECRET=supersecret_jwt_key_change_me_in_production_12345
+      - JWT_SECRET=${JWT_SECRET:-change_me_in_production_12345678901234}
       - EMBEDDING_PROVIDER=sentence-transformers
       - LLM_PROVIDER=mock
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-http://localhost:3000,http://localhost:5173}
     volumes:
       - ./rag_assistant.db:/app/rag_assistant.db
       - ./chroma_data:/app/chroma_data

@@ -54,8 +54,8 @@ from sqlalchemy import event
 def set_sqlite_pragma(dbapi_connection, connection_record):
     try:
         cursor = dbapi_connection.cursor()
-        cursor.execute("PRAGMA journal_mode=DELETE")
-        cursor.execute("PRAGMA synchronous=OFF")
+        cursor.execute("PRAGMA journal_mode=WAL")  # Write-Ahead Logging for better concurrency
+        cursor.execute("PRAGMA synchronous=NORMAL")  # Safer than OFF, still performant
         cursor.close()
     except Exception as pragma_err:
         print(f"[DB Warning] SQLite PRAGMA configuration warning: {pragma_err}")

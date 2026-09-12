@@ -1,4 +1,5 @@
 import os
+from typing import List
 try:
     from pydantic_settings import BaseSettings
 except ImportError:
@@ -32,8 +33,8 @@ class Settings(BaseSettings):
     # Database (Absolute path to project root rag_assistant.db)
     DATABASE_URL: str = os.getenv("DATABASE_URL", get_default_db_url())
     
-    # Authentication
-    JWT_SECRET: str = os.getenv("JWT_SECRET", "supersecret_jwt_key_change_me_in_production_12345")
+    # Authentication - MUST be set in production via environment variable
+    JWT_SECRET: str = os.getenv("JWT_SECRET", "" if os.getenv("ENV") == "production" else "dev_secret_key_change_in_production")
     JWT_ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440 # 24 hours
     
@@ -44,6 +45,9 @@ class Settings(BaseSettings):
     # API Keys
     OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "")
     GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
+    
+    # CORS Configuration - restrict in production (comma-separated string)
+    ALLOWED_ORIGINS_STR: str = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:5173")
     
     # Vector store & document paths (Absolute paths to project root)
     CHROMA_DB_DIR: str = os.getenv("CHROMA_DB_DIR", get_default_chroma_dir())
@@ -58,6 +62,12 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
         extra = "ignore"
+    
+    def get_allowed_origins(self) -> List[str]:
+        """Parse ALLOWED_ORIGINS from comma-separated string."""
+        if self.ALLOWED_ORIGINS_STR == "*":
+            return ["*"]
+        return [origin.strip() for origin in self.ALLOWED_ORIGINS_STR.split(",")]
 
 settings = Settings()
 

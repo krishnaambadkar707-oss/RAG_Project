@@ -1,4 +1,12 @@
 const API_BASE = '/api';
+const REQUEST_TIMEOUT = 30000; // 30 seconds
+
+// Helper function to create a timeout promise
+function timeoutPromise(ms) {
+  return new Promise((_, reject) =>
+    setTimeout(() => reject(new Error(`Request timeout after ${ms}ms`)), ms)
+  );
+}
 
 export const getAuthToken = () => localStorage.getItem('rag_token');
 export const setAuthToken = (token) => localStorage.setItem('rag_token', token);
@@ -31,11 +39,18 @@ async function request(endpoint, options = {}) {
 
   let response;
   try {
-    response = await fetch(`${API_BASE}${endpoint}`, {
-      ...options,
-      headers,
-    });
+    // Use Promise.race to implement timeout
+    response = await Promise.race([
+      fetch(`${API_BASE}${endpoint}`, {
+        ...options,
+        headers,
+      }),
+      timeoutPromise(REQUEST_TIMEOUT)
+    ]);
   } catch (netErr) {
+    if (netErr.message.includes('timeout')) {
+      throw new Error('Request timeout. The backend server may be unreachable or slow to respond.');
+    }
     throw new Error('Backend server is unreachable. Please ensure the FastAPI server is running on port 8000.');
   }
 
